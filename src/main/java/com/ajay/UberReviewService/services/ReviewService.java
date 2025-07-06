@@ -20,7 +20,9 @@ public class ReviewService implements CommandLineRunner {
         System.out.println("**************************");
 //        Review r = new Review();
 
-        Review r = Review.builder().content("Amazing").createdAt(new Date()).updatedAt(new Date()).rating(5.0).build(); // as we are using @Builder in Review Entity
+//        Review r = Review.builder().content("Amazing").createdAt(new Date()).updatedAt(new Date()).rating(5.0).build(); // as we are using @Builder in Review Entity
+        Review r = Review.builder().content("Excellent").rating(5.0).build(); // as we are using @Builder in Review Entity
+
         System.out.println(r);
         reviewRepository.save(r);
     }
