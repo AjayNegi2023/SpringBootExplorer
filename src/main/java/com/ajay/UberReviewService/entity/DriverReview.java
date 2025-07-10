@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Entity
 @Data
-public class DriverReview {
+public class DriverReview extends Review {
 
     String driverComment;
 }
