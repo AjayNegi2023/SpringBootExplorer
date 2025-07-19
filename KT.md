@@ -182,3 +182,119 @@ public class User {
 
 ---
 
+
+# Custom object (DTO) using HQL with @Query in a Spring Data JPA repository.
+
+## User : Entity  UserDTO: that contains only id, name.
+
+### 1. User Entity
+
+```Java
+@Entity
+@Table(name = "users")
+public class User {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+    private String email;
+    private String role;
+
+    // Getters and setters
+}
+```
+
+### 2. UserDTO
+
+```java
+public class UserDTO {
+
+    private Long id;
+    private String name;
+
+    // Constructor (important for HQL)
+    public UserDTO(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    // Getters and setters (or use Lombok)
+}
+```
+
+### 3. Repository with HQL using @Query
+
+```java
+public interface UserRepository extends JpaRepository<User, Long> {
+
+    @Query("SELECT new com.example.demo.dto.UserDTO(u.id, u.name) FROM User u WHERE u.role = :role")
+    List<UserDTO> findUsersByRole(@Param("role") String role);
+}
+```
+
+### 4. Usage in Service
+
+```java
+@Service
+public class UserService {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    public List<UserDTO> getAdmins() {
+        return userRepository.findUsersByRole("ADMIN");
+    }
+}
+
+```
+
+#  `@Param` in Spring Data JPA
+
+`@Param` is an annotation provided by **Spring Data JPA** that is used to bind method parameters to **named parameters** in your `@Query` annotations.
+
+---
+
+###  Example:
+
+```java
+@Query("SELECT u FROM User u WHERE u.role = :role")
+List<User> findByUserRole(@Param("role") String role);
+```
+
+###  What's happening?
+
+* `:role` → refers to a **named parameter** inside the HQL/JPQL query.
+* `@Param("role")` → binds the method parameter (`String role`) to the named query parameter `:role`.
+
+---
+
+###  Why is it necessary?
+
+Spring needs to know **which variable in your method** corresponds to **which placeholder in the query**.
+
+Without `@Param`, Spring won’t know how to substitute `:role`.
+
+---
+
+###  You can also use multiple parameters:
+
+```java
+@Query("SELECT u FROM User u WHERE u.name = :name AND u.role = :role")
+List<User> findByNameAndRole(@Param("name") String name, @Param("role") String role);
+```
+
+---
+
+###  When can you skip `@Param`?
+
+If you use **Spring Data JPA method naming conventions**, you don’t need to write `@Query` or `@Param`:
+
+```java
+List<User> findByRole(String role); // Works without @Query or @Param
+```
+
+## But for **custom HQL or native SQL queries**, `@Param` is required.
+
+---
